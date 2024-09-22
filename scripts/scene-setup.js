@@ -24,14 +24,6 @@ export function setupScene() {
     light.position.set(5, 10, 5).normalize();
     scene.add(light);
 
-    // Load GLB asset
-    const loader = new GLTFLoader();
-    const glbAssetUrl = 'https://cdn.glitch.me/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/fnaf_sb_vanny_hallway.glb?v=1726927327935';
-    loader.load(glbAssetUrl, (gltf) => {
-        gltf.scene.scale.set(1, 1, 1); // Set the scale of the model
-        gltf.scene.position.set(0, 40, 0);
-        scene.add(gltf.scene);
-    });
 
     return { scene, camera, renderer, world };
 }

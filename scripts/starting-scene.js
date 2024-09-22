@@ -9,30 +9,12 @@ const { scene, camera, renderer, world } = setupScene();
 
 // Load GLB asset
 const loader = new GLTFLoader();
-const glbAssetUrl = 'https://cdn.glitch.me/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/fnaf_sb_vanny_hallway.glb?v=1726927327935';
+const glbAssetUrl = 'https://cdn.glitch.me/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/starting%20scene_basement.glb?v=1727029680810';
 loader.load(glbAssetUrl, (gltf) => {
-    gltf.scene.scale.set(1, 1, 1); // Set the scale of the model
-    gltf.scene.position.set(0, 40, 0);
+    gltf.scene.scale.set(0.15, 0.15, 0.15); // Set the scale of the model
+    gltf.scene.position.set(0, -40, 0);
     scene.add(gltf.scene);
 });
-
-// Create a massless body around the camera
-const cameraBody = new CANNON.Body({ mass: 0 });
-cameraBody.position.set(0, 1, 0); // Position above the ground
-world.add(cameraBody);
-
-// Create the plane and sphere
-const { sphereMesh, sphereBody } = createSphere();
-
-const { planeMesh: wallMesh, groundBody: wallBody } = createPlane(
-    new THREE.Vector3(0, 0, 0), // Position the wall
-    new THREE.Vector3(0, Math.PI/2, 0) // Rotate it 90 degrees around the X-axis
-);
-scene.add(wallMesh);
-world.addBody(wallBody);
-
-scene.add(sphereMesh);
-world.addBody(sphereBody);
 
 
 //add bounding box
@@ -51,29 +33,25 @@ function animate() {
     requestAnimationFrame(animate);
     world.step(1 / 60);
     console.log(camera.position.x, camera.position.y, camera.position.z)
-    if(camera.position.x > box.max.x){
-        camera.position.x = box.max.x;
-    }
+    // if(camera.position.x > box.max.x){
+    //     camera.position.x = box.max.x;
+    // }
     
-    if(camera.position.x < box.min.x){
-        camera.position.x = box.min.x;
-    }
+    // if(camera.position.x < box.min.x){
+    //     camera.position.x = box.min.x;
+    // }
     
-    if(camera.position.z > box.max.z){
-        camera.position.z = box.max.z;
-    }
+    // if(camera.position.z > box.max.z){
+    //     camera.position.z = box.max.z;
+    // }
     
-    if(camera.position.z < box.min.z){
-        camera.position.z = box.min.z;
-    }
+    // if(camera.position.z < box.min.z){
+    //     camera.position.z = box.min.z;
+    // }
 
-    // Update Three.js sphere to match Cannon.js sphere position and rotation
-    sphereMesh.position.copy(sphereBody.position);
-    sphereMesh.quaternion.copy(sphereBody.quaternion);
     // Update player controls
     controls.updateMovement(0.05); // Pass deltaTime
 
-    //camera.position.copy(cameraBody.position);
     // Render the scene
     renderer.render(scene, camera);
 
