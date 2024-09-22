@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Minor Project with Player Collisions</title>
+    
+    <!-- A-Frame library -->
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v$npm_package_version/dist/aframe-physics-system.min.js"></script>
+    
+    <!-- Link to the external stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <!-- A-Frame Scene -->
+    <a-scene physics="gravity: -9.8; debug: true;">
+      <!-- Assets -->
+      <a-assets>
+        <a-asset-item id="fnafHallway" src="https://cdn.glitch.me/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/fnaf_sb_vanny_hallway.glb?v=1726927327935"></a-asset-item>
+        <a-asset-item id="ghost" src="https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/spider_doll.glb?v=1726948097905"></a-asset-item>
+      </a-assets>
+
+      <!-- Skybox -->
+      <a-sky src="https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/Skybox.jpg?v=1726929484252"></a-sky>
+
+      <!-- Hallway Model -->
+      <a-entity 
+        gltf-model="#fnafHallway" 
+        position="0 30 0" 
+        scale="1 1 1">
+      </a-entity>
+
+      <!-- Ghost Model with ghost-chase component -->
+      <a-entity 
+        id="ghost"
+        gltf-model="#ghost" 
+        position="-18 -3 -30" 
+        scale="10 10 10"
+        ghost-chase>
+      </a-entity>
+
+      <!-- Ground plane with static-body -->
+      <a-plane 
+        rotation="-90 0 0" 
+        width="650" 
+        height="95" 
+        color="#ffffff"
+        position="175 -14 0" 
+        static-body>
+      </a-plane>
+
+      <!-- Player Camera with movement controls -->
+      <a-entity 
+        camera
+        id="player" 
+        wasd-controls 
+        position="0 0 5"  
+        look-controls
+        dynamic-body
+        wasd-controls="acceleration: 200">
+      </a-entity>
+
+       <!-- Add ambient light -->
+      <a-light type="ambient" color="purple" intensity="0.2"></a-light>
+    </a-scene>
+
+    <!-- "You Died" message styled using CSS -->
+    <div id="death-message">You Died</div>
+
+    <!-- Link to the custom script file for ghost chasing logic -->
+    <script src="ghost-chase.js"></script>
+  </body>
+</html>
