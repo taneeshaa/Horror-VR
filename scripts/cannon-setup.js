@@ -3,26 +3,34 @@ import { PlayerControls } from './controls.js'; // Import the controls class
 import { createPlane, createSphere } from './shapes.js'; // Import shape creation functions
 import * as THREE from 'three';
 
-// Setup the scene, camera, renderer, and Cannon.js world
 const { scene, camera, renderer, world } = setupScene();
 
+// Create a massless body around the camera
+const cameraBody = new CANNON.Body({ mass: 0 });
+cameraBody.position.set(0, 1, 0); // Position above the ground
+world.add(cameraBody);
+
 // Create the plane and sphere
-const { planeMesh, groundBody } = createPlane();
 const { sphereMesh, sphereBody } = createSphere();
 
 const { planeMesh: wallMesh, groundBody: wallBody } = createPlane(
-    new THREE.Vector3(0, 25, 0), // Position the wall
-    new THREE.Vector3(Math.PI / 2, 0, 0) // Rotate it 90 degrees around the X-axis
+    new THREE.Vector3(0, 0, 0), // Position the wall
+    new THREE.Vector3(0, Math.PI/2, 0) // Rotate it 90 degrees around the X-axis
 );
-
 scene.add(wallMesh);
 world.addBody(wallBody);
 
-
-scene.add(planeMesh);
-world.addBody(groundBody);
 scene.add(sphereMesh);
 world.addBody(sphereBody);
+
+
+//add bounding box
+var box = new THREE.Box3();
+const min = new THREE.Vector3(-150, 0, -45); // Replace with your min coordinates
+const max = new THREE.Vector3(615, 11, 41); // Replace with your max coordinates
+
+// Set the Box3 dimensions
+box.set(min, max);
 
 // Setup PlayerControls
 const controls = new PlayerControls(camera, document.body);
@@ -31,16 +39,33 @@ const controls = new PlayerControls(camera, document.body);
 function animate() {
     requestAnimationFrame(animate);
     world.step(1 / 60);
+    console.log(camera.position.x, camera.position.y, camera.position.z)
+    if(camera.position.x > box.max.x){
+        camera.position.x = box.max.x;
+    }
+    
+    if(camera.position.x < box.min.x){
+        camera.position.x = box.min.x;
+    }
+    
+    if(camera.position.z > box.max.z){
+        camera.position.z = box.max.z;
+    }
+    
+    if(camera.position.z < box.min.z){
+        camera.position.z = box.min.z;
+    }
 
     // Update Three.js sphere to match Cannon.js sphere position and rotation
     sphereMesh.position.copy(sphereBody.position);
     sphereMesh.quaternion.copy(sphereBody.quaternion);
-
     // Update player controls
     controls.updateMovement(0.05); // Pass deltaTime
 
+    //camera.position.copy(cameraBody.position);
     // Render the scene
     renderer.render(scene, camera);
+
 }
 
 // Handle window resizing
@@ -49,6 +74,5 @@ window.addEventListener('resize', () => {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
 // Start the animation loop
 animate();

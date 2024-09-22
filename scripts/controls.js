@@ -56,8 +56,8 @@ export class PlayerControls {
             this.velocity.z -= this.velocity.z * 10.0 * deltaTime;
 
             // Apply directional movement
-            if (this.moveForward || this.moveBackward) this.velocity.z -= this.direction.z * 20.0 * deltaTime;
-            if (this.moveLeft || this.moveRight) this.velocity.x -= this.direction.x * 20.0 * deltaTime;
+            if (this.moveForward || this.moveBackward) this.velocity.z -= this.direction.z * 60.0 * deltaTime;
+            if (this.moveLeft || this.moveRight) this.velocity.x -= this.direction.x * 60.0 * deltaTime;
 
             this.controls.moveRight(-this.velocity.x * deltaTime);
             this.controls.moveForward(-this.velocity.z * deltaTime);
