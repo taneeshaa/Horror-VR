@@ -12,7 +12,6 @@
     "@c-frame/aframe-physics-system": "^4.2.2",
     "aframe-physics-system": "^4.0.2",
     "ammo.js": "github:mozillareality/ammo.js#hubs/master",
-    "cannon-es": "^0.20.0",
     "three": "^0.168.0"
   }
 }
