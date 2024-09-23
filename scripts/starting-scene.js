@@ -4,7 +4,6 @@ import { createPlane, createSphere } from './shapes.js'; // Import shape creatio
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-
 const { scene, camera, renderer, world } = setupScene();
 
 // Load GLB asset
@@ -16,14 +15,49 @@ loader.load(glbAssetUrl, (gltf) => {
     scene.add(gltf.scene);
 });
 
+const { sphereMesh, sphereBody } = createSphere();
+
+const { planeMesh: wallMesh, groundBody: wallBody } = createPlane(
+    new THREE.Vector3(-45, -6, -1), // Position the wall
+    new THREE.Vector3(-Math.PI/2, 0, 0),
+    35,
+    70 
+);
+scene.add(wallMesh);
+world.addBody(wallBody);
+
+scene.add(sphereMesh);
+world.addBody(sphereBody);
+
+
 
 //add bounding box
 var box = new THREE.Box3();
-const min = new THREE.Vector3(-150, 0, -45); // Replace with your min coordinates
-const max = new THREE.Vector3(615, 11, 41); // Replace with your max coordinates
+const min = new THREE.Vector3(-180, 0, -415); // Replace with your min coordinates
+const max = new THREE.Vector3(-20, 11, 49); // Replace with your max coordinates
 
 // Set the Box3 dimensions
 box.set(min, max);
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2(0, 0); // Since crosshair is in the center, keep mouse coordinates at (0,0)
+
+function checkIntersections() {
+    raycaster.setFromCamera(mouse, camera);
+
+    // Array of objects to check intersections with (e.g., interactive objects)
+    const objectsToTest = [wallMesh]; // Add all objects you want to check against
+    const intersects = raycaster.intersectObjects(objectsToTest, true);
+
+    if (intersects.length > 0) {
+        const firstIntersectedObject = intersects[0].object;
+        console.log('Hit:', firstIntersectedObject);
+
+        // Perform the interaction logic (e.g., pick up an object, open a door)
+        // Example: change the color of the hit object
+        firstIntersectedObject.material.color.set(0xff0000); // Change color to red
+    }
+}
 
 // Setup PlayerControls
 const controls = new PlayerControls(camera, document.body);
@@ -32,22 +66,25 @@ const controls = new PlayerControls(camera, document.body);
 function animate() {
     requestAnimationFrame(animate);
     world.step(1 / 60);
+
+    checkIntersections();
+
     console.log(camera.position.x, camera.position.y, camera.position.z)
-    // if(camera.position.x > box.max.x){
-    //     camera.position.x = box.max.x;
-    // }
+    if(camera.position.x > box.max.x){
+        camera.position.x = box.max.x;
+    }
     
-    // if(camera.position.x < box.min.x){
-    //     camera.position.x = box.min.x;
-    // }
+    if(camera.position.x < box.min.x){
+        camera.position.x = box.min.x;
+    }
     
-    // if(camera.position.z > box.max.z){
-    //     camera.position.z = box.max.z;
-    // }
+    if(camera.position.z > box.max.z){
+        camera.position.z = box.max.z;
+    }
     
-    // if(camera.position.z < box.min.z){
-    //     camera.position.z = box.min.z;
-    // }
+    if(camera.position.z < box.min.z){
+        camera.position.z = box.min.z;
+    }
 
     // Update player controls
     controls.updateMovement(0.05); // Pass deltaTime
