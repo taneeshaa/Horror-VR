@@ -15,6 +15,13 @@ loader.load(glbAssetUrl, (gltf) => {
     scene.add(gltf.scene);
 });
 
+const buttonAssetUrl = 'https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/red_button.glb?v=1727126741728';
+loader.load(buttonAssetUrl, (gltf) => {
+    gltf.scene.scale.set(13, 13, 13); 
+    gltf.scene.position.set(-55, -5, -17);
+    scene.add(gltf.scene);
+});
+
 // Create objects
 const { wallMesh, wallBody, sphereMesh, sphereBody } = AddObjects(scene, world);
 
@@ -24,7 +31,8 @@ document.body.appendChild(renderer.domElement);
 const overlay = document.getElementById('overlay');
 
 function toggleText() {
-    overlay.style.display = overlay.style.display === 'none' ? 'block' : 'none'; // Toggle text visibility
+    overlay.textContent = "Collect all the spiders and burn them, while escaping the Enemy!";
+    //change from this scene to another scene
 }
 
 // Add bounding box
@@ -35,7 +43,6 @@ box.set(min, max);
 
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2(0, 0); 
-
 document.addEventListener('click', () => {
     checkIntersections(); 
 });
@@ -50,9 +57,6 @@ function checkIntersections() {
         const firstIntersectedObject = intersects[0].object;
         toggleText();
         console.log('Hit:', firstIntersectedObject);
-
-        // Perform the interaction logic (e.g., pick up an object, open a door)
-        firstIntersectedObject.material.color.set(0xff0000); // Change color to red
     }
 }
 
@@ -61,6 +65,8 @@ const controls = new PlayerControls(camera, document.body);
 function animate() {
     requestAnimationFrame(animate);
     world.step(1 / 60);
+
+    console.log(camera.position.x, camera.position.y, camera.position.z);
 
     // Clamp camera position within the bounding box
     camera.position.x = Math.max(box.min.x, Math.min(camera.position.x, box.max.x));

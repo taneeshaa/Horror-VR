@@ -2,16 +2,18 @@ body {
   margin: 0;
 }
 
-
-.text {
+#overlay {
   font-family: 'Times New Roman', Times, serif;
-  color: purple;
-  position: absolute; /* Position it in the HTML document */
-  top: 10px; /* Adjust position */
-  left: 10px; /* Adjust position */
-  display: none; /* Initially hidden */
-  font-size: 24px; /* Adjust size */
+  position: absolute;
+  top: 10px; /* Adjust this value if you want to move the text further down or up */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  text-align: center;
+  font-size: 24px; /* Adjust font size as needed */
+  color: red; /* Adjust text color if needed */
 }
+
 
 #crosshair {
   position: absolute;

@@ -51,3 +51,33 @@ export function createSphere(
 
     return { sphereMesh, sphereBody };
 }
+
+export function createBox(
+    position = new THREE.Vector3(0, 0, 0), 
+    rotation = new THREE.Vector3(0, 0, 0), 
+    width = 1, 
+    height = 1, 
+    depth = 1
+) {
+    // Create a Three.js box with customizable width, height, and depth
+    const boxGeometry = new THREE.BoxGeometry(width, height, depth);
+    const boxMaterial = new THREE.MeshStandardMaterial({ color: 0x0000ff });
+    const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
+
+    // Set position and rotation
+    boxMesh.position.copy(position);
+    boxMesh.rotation.set(rotation.x, rotation.y, rotation.z);
+
+    // Create a Cannon.js box with the same dimensions
+    const halfExtents = new CANNON.Vec3(width / 2, height / 2, depth / 2); // Half extents for Cannon.js
+    const boxShape = new CANNON.Box(halfExtents);
+    const boxBody = new CANNON.Body({
+        mass: 1, // Dynamic body
+        position: new CANNON.Vec3(position.x, position.y, position.z),
+        shape: boxShape
+    });
+
+    boxBody.quaternion.setFromEuler(rotation.x, rotation.y, rotation.z); // Set rotation for Cannon.js body
+
+    return { boxMesh, boxBody };
+}
