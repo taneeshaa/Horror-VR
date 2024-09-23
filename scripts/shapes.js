@@ -8,7 +8,15 @@ export function createPlane(
 ) {
     // Create a Three.js plane with adjustable width and height
     const planeGeometry = new THREE.PlaneGeometry(width, height);
-    const planeMaterial = new THREE.MeshStandardMaterial({ color: 0x888888, side: THREE.DoubleSide });
+
+    // Create a transparent material
+    const planeMaterial = new THREE.MeshStandardMaterial({
+        color: 0x888888, // Set any color you want
+        transparent: true, // Enable transparency
+        opacity: 0.5, // Set the level of transparency (0 = fully transparent, 1 = fully opaque)
+        side: THREE.DoubleSide // Optional, renders both sides of the plane
+    });
+
     const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
     
     // Set position and rotation
@@ -59,25 +67,32 @@ export function createBox(
     height = 1, 
     depth = 1
 ) {
-    // Create a Three.js box with customizable width, height, and depth
+    // Create a box geometry
     const boxGeometry = new THREE.BoxGeometry(width, height, depth);
-    const boxMaterial = new THREE.MeshStandardMaterial({ color: 0x0000ff });
-    const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
+    
+    // Create a transparent material
+    const boxMaterial = new THREE.MeshStandardMaterial({
+        color: 0xff0000, // Red color for the box
+        transparent: true, // Enable transparency
+        opacity: 0, // Set transparency level (50% opacity)
+        side: THREE.DoubleSide // Optional: render both sides
+    });
 
+    // Create the mesh
+    const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
+    
     // Set position and rotation
     boxMesh.position.copy(position);
     boxMesh.rotation.set(rotation.x, rotation.y, rotation.z);
 
-    // Create a Cannon.js box with the same dimensions
-    const halfExtents = new CANNON.Vec3(width / 2, height / 2, depth / 2); // Half extents for Cannon.js
-    const boxShape = new CANNON.Box(halfExtents);
+    // Create a corresponding Cannon.js body
+    const boxShape = new CANNON.Box(new CANNON.Vec3(width / 2, height / 2, depth / 2));
     const boxBody = new CANNON.Body({
-        mass: 1, // Dynamic body
-        position: new CANNON.Vec3(position.x, position.y, position.z),
-        shape: boxShape
+        mass: 0, // Static body
+        position: new CANNON.Vec3(position.x, position.y, position.z)
     });
-
-    boxBody.quaternion.setFromEuler(rotation.x, rotation.y, rotation.z); // Set rotation for Cannon.js body
+    boxBody.addShape(boxShape);
+    boxBody.quaternion.setFromEuler(rotation.x, rotation.y, rotation.z); // Set rotation
 
     return { boxMesh, boxBody };
 }

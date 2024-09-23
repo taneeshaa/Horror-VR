@@ -2,11 +2,12 @@ import { setupScene } from './scene-setup.js';
 import { PlayerControls } from './controls.js'; 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import {AddObjects } from './starting-scene-objects.js';
+import { AddObjects } from './starting-scene-objects.js';
+import { createBox } from './shapes.js'; // Import the createBox function
 
 const { scene, camera, renderer, world } = setupScene();
 
-// Load GLB asset
+// Load GLB asset for the main scene
 const loader = new GLTFLoader();
 const glbAssetUrl = 'https://cdn.glitch.me/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/starting%20scene_basement.glb?v=1727029680810';
 loader.load(glbAssetUrl, (gltf) => {
@@ -15,6 +16,7 @@ loader.load(glbAssetUrl, (gltf) => {
     scene.add(gltf.scene);
 });
 
+// Load GLB asset for the button
 const buttonAssetUrl = 'https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/red_button.glb?v=1727126741728';
 loader.load(buttonAssetUrl, (gltf) => {
     gltf.scene.scale.set(13, 13, 13); 
@@ -22,8 +24,8 @@ loader.load(buttonAssetUrl, (gltf) => {
     scene.add(gltf.scene);
 });
 
-// Create objects
-const { wallMesh, wallBody, sphereMesh, sphereBody } = AddObjects(scene, world);
+// Create other objects in the scene
+const { wallMesh, wallBody, sphereMesh, sphereBody, boxMesh, boxBody } = AddObjects(scene, world);
 
 document.body.appendChild(renderer.domElement);
 
@@ -50,15 +52,56 @@ document.addEventListener('click', () => {
 function checkIntersections() {
     raycaster.setFromCamera(mouse, camera);
 
-    const objectsToTest = [wallMesh, sphereMesh]; // Add all objects you want to check against
+    const objectsToTest = [boxMesh]; // Add the button box to objects to test
     const intersects = raycaster.intersectObjects(objectsToTest, true);
     
     if (intersects.length > 0) {
         const firstIntersectedObject = intersects[0].object;
         toggleText();
         console.log('Hit:', firstIntersectedObject);
+
+        // Change the script from starting-scene.js to circus-scene.js
+        switchSceneScript('scripts/circus-scene.js');
     }
 }
+
+// Function to remove all loaded assets from the scene
+function removeAssets() {
+    // Remove all children from the scene
+    while (scene.children.length > 0) {
+        const child = scene.children[0];
+        scene.remove(child);
+    }
+
+    const glbAssetUrl = 'Assets\dark_circus_dlc_map.glb';
+    loader.load(glbAssetUrl, (gltf) => {
+        gltf.scene.scale.set(10, 10, 10); 
+        gltf.scene.position.set(0, -40, 0);
+        scene.add(gltf.scene);
+});
+}
+
+// Function to switch scene script
+function switchSceneScript(newScriptSrc) {
+    // Remove existing assets from the scene
+    removeAssets();
+
+    const oldScript = document.querySelector('script[src="scripts/starting-scene.js"]');
+    if (oldScript) {
+        oldScript.remove();  // Remove the current scene script
+    }
+
+    const newScript = document.createElement('script');
+    newScript.src = newScriptSrc;
+    newScript.type = "module";
+    
+    // Append the new scene script to the body
+    document.body.appendChild(newScript);
+
+    console.log(`Switched to scene script: ${newScriptSrc}`);
+}
+
+
 
 const controls = new PlayerControls(camera, document.body);
 

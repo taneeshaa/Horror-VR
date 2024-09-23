@@ -1,4 +1,4 @@
-import { createPlane, createSphere } from './shapes.js'; 
+import { createPlane, createSphere, createBox } from './shapes.js'; 
 import * as THREE from 'three';
 
 export function AddObjects(scene, world){
@@ -17,7 +17,23 @@ export function AddObjects(scene, world){
   scene.add(wallMesh);
   world.addBody(wallBody);
 
+  // Create a box around the button
+  const buttonBoxPosition = new THREE.Vector3(-55, -5, -17); // Position of the button
+  const buttonBoxSize = new THREE.Vector3(5, 5, 5); // Adjust size to encapsulate button properly
+
+  // Create the box around the button using the createBox function
+  const { boxMesh, boxBody } = createBox(
+      buttonBoxPosition,   // Position where the box should be
+      new THREE.Vector3(0, 0, 0), // No rotation
+      5,     // Width
+      5,     // Height
+      5      // Depth
+  );
+
+  // Add the box to the scene and physics world
+  scene.add(boxMesh);
+  world.addBody(boxBody);
   
 
-  return { wallMesh, wallBody, sphereMesh, sphereBody};
+  return { wallMesh, wallBody, sphereMesh, sphereBody, boxMesh, boxBody};
 }
