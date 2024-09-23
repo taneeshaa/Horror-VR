@@ -4,7 +4,6 @@ import { createPlane, createSphere } from './shapes.js'; // Import shape creatio
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-
 const { scene, camera, renderer, world } = setupScene();
 
 // Load GLB asset
@@ -15,11 +14,6 @@ loader.load(glbAssetUrl, (gltf) => {
     gltf.scene.position.set(0, 40, 0);
     scene.add(gltf.scene);
 });
-
-// Create a massless body around the camera
-const cameraBody = new CANNON.Body({ mass: 0 });
-cameraBody.position.set(0, 1, 0); // Position above the ground
-world.add(cameraBody);
 
 // Create the plane and sphere
 const { sphereMesh, sphereBody } = createSphere();

@@ -1,8 +1,8 @@
-import { setupScene } from './scene-setup.js'; // Import the scene setup function
-import { PlayerControls } from './controls.js'; // Import the controls class
-import { createPlane, createSphere } from './shapes.js'; // Import shape creation functions
+import { setupScene } from './scene-setup.js'; 
+import { PlayerControls } from './controls.js'; 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import {AddObjects } from './starting-scene-objects.js';
 
 const { scene, camera, renderer, world } = setupScene();
 
@@ -10,88 +10,67 @@ const { scene, camera, renderer, world } = setupScene();
 const loader = new GLTFLoader();
 const glbAssetUrl = 'https://cdn.glitch.me/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/starting%20scene_basement.glb?v=1727029680810';
 loader.load(glbAssetUrl, (gltf) => {
-    gltf.scene.scale.set(0.15, 0.15, 0.15); // Set the scale of the model
+    gltf.scene.scale.set(0.15, 0.15, 0.15); 
     gltf.scene.position.set(0, -40, 0);
     scene.add(gltf.scene);
 });
 
-const { sphereMesh, sphereBody } = createSphere();
+// Create objects
+const { wallMesh, wallBody, sphereMesh, sphereBody } = AddObjects(scene, world);
 
-const { planeMesh: wallMesh, groundBody: wallBody } = createPlane(
-    new THREE.Vector3(-45, -6, -1), // Position the wall
-    new THREE.Vector3(-Math.PI/2, 0, 0),
-    35,
-    70 
-);
-scene.add(wallMesh);
-world.addBody(wallBody);
+document.body.appendChild(renderer.domElement);
 
-scene.add(sphereMesh);
-world.addBody(sphereBody);
+// Function to toggle text visibility
+const overlay = document.getElementById('overlay');
 
+function toggleText() {
+    overlay.style.display = overlay.style.display === 'none' ? 'block' : 'none'; // Toggle text visibility
+}
 
-
-//add bounding box
-var box = new THREE.Box3();
-const min = new THREE.Vector3(-180, 0, -415); // Replace with your min coordinates
-const max = new THREE.Vector3(-20, 11, 49); // Replace with your max coordinates
-
-// Set the Box3 dimensions
+// Add bounding box
+const box = new THREE.Box3();
+const min = new THREE.Vector3(-180, 0, -415); 
+const max = new THREE.Vector3(-20, 11, 49); 
 box.set(min, max);
 
 const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2(0, 0); // Since crosshair is in the center, keep mouse coordinates at (0,0)
+const mouse = new THREE.Vector2(0, 0); 
+
+document.addEventListener('click', () => {
+    checkIntersections(); 
+});
 
 function checkIntersections() {
     raycaster.setFromCamera(mouse, camera);
 
-    // Array of objects to check intersections with (e.g., interactive objects)
-    const objectsToTest = [wallMesh]; // Add all objects you want to check against
+    const objectsToTest = [wallMesh, sphereMesh]; // Add all objects you want to check against
     const intersects = raycaster.intersectObjects(objectsToTest, true);
-
+    
     if (intersects.length > 0) {
         const firstIntersectedObject = intersects[0].object;
+        toggleText();
         console.log('Hit:', firstIntersectedObject);
 
         // Perform the interaction logic (e.g., pick up an object, open a door)
-        // Example: change the color of the hit object
         firstIntersectedObject.material.color.set(0xff0000); // Change color to red
     }
 }
 
-// Setup PlayerControls
 const controls = new PlayerControls(camera, document.body);
 
-// Update movement logic in the animate loop
 function animate() {
     requestAnimationFrame(animate);
     world.step(1 / 60);
 
-    checkIntersections();
+    // Clamp camera position within the bounding box
+    camera.position.x = Math.max(box.min.x, Math.min(camera.position.x, box.max.x));
+    camera.position.z = Math.max(box.min.z, Math.min(camera.position.z, box.max.z));
 
-    console.log(camera.position.x, camera.position.y, camera.position.z)
-    if(camera.position.x > box.max.x){
-        camera.position.x = box.max.x;
-    }
-    
-    if(camera.position.x < box.min.x){
-        camera.position.x = box.min.x;
-    }
-    
-    if(camera.position.z > box.max.z){
-        camera.position.z = box.max.z;
-    }
-    
-    if(camera.position.z < box.min.z){
-        camera.position.z = box.min.z;
-    }
+    sphereMesh.position.copy(sphereBody.position);
+    sphereMesh.quaternion.copy(sphereBody.quaternion);
 
-    // Update player controls
-    controls.updateMovement(0.05); // Pass deltaTime
-
-    // Render the scene
+    controls.updateMovement(0.05);
     renderer.render(scene, camera);
-
 }
 
 // Handle window resizing
@@ -100,5 +79,6 @@ window.addEventListener('resize', () => {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
 // Start the animation loop
 animate();

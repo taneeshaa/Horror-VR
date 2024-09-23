@@ -2,6 +2,17 @@ body {
   margin: 0;
 }
 
+
+.text {
+  font-family: 'Times New Roman', Times, serif;
+  color: purple;
+  position: absolute; /* Position it in the HTML document */
+  top: 10px; /* Adjust position */
+  left: 10px; /* Adjust position */
+  display: none; /* Initially hidden */
+  font-size: 24px; /* Adjust size */
+}
+
 #crosshair {
   position: absolute;
   top: 50%;
