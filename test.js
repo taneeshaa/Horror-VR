@@ -117,12 +117,14 @@ function animate() {
   cube.position.copy(cubeBody.position);
   cube.quaternion.copy(cubeBody.quaternion);
 
-  // Camera should follow the cube
-  camera.position.set(
+  // Smoothing the camera following the cube with lerp (linear interpolation)
+  const targetPosition = new THREE.Vector3(
     cubeBody.position.x,
-    cubeBody.position.y + 1, // Raise camera slightly above cube
+    cubeBody.position.y + 1, // Slightly above the cube
     cubeBody.position.z
   );
+
+  camera.position.lerp(targetPosition, 0.1); // Smooth follow by interpolating
 
   // Movement
   velocity.set(0, 0, 0);
