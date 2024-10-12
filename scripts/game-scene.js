@@ -3,6 +3,8 @@ import { PointerLockControls } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { setupScene } from './scene-setup.js'; 
 import { playerMovement } from './playerMovement.js';
+import {createWall} from './shapes';
+import { createAllScenes } from './sceneManager.js';
 
 const { scene, camera, renderer, world, cube, cubeBody} = setupScene();
 
@@ -22,18 +24,11 @@ loader.load(buttonAssetUrl, (gltf) => {
     gltf.scene.position.set(-55, -5, -17);
     scene.add(gltf.scene);
 });
+// const {scene1, scene2, scene3, scene4} = createAllScenes();
+
+createWall(world, scene, { x: 1, y: 0.5, z: 5 }, {width: 10, height: 2, depth: 0.5});
 
 
-
-
-
-// Ground physics body
-const groundBody = new CANNON.Body({
-  mass: 0, // Static body
-  shape: new CANNON.Plane()
-});
-groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0); // Align it with the plane geometry
-world.addBody(groundBody);
 
 // Wall geometry and Cannon.js body
 const wallGeometry = new THREE.BoxGeometry(10, 2, 0.5);
@@ -57,8 +52,6 @@ document.body.addEventListener('click', () => {
 
 // Attach camera to the cube (player)
 camera.position.set(0, 1, 0); // Slightly above the cube body
-
-
 
 // Add bounding box
 const box = new THREE.Box3();
@@ -85,7 +78,6 @@ function checkIntersections() {
         console.log('Hit:', firstIntersectedObject);
 
         // Change the script from starting-scene.js to circus-scene.js
-        //switchSceneScript('scripts/circus-scene.js');
     }
 }
 
@@ -102,7 +94,6 @@ function animate() {
     
   // Prevent cube from rotating by locking angular velocity
   cubeBody.angularVelocity.set(0, 0, 0); // Ensure no spin
-
   
   // Render the scene
   renderer.render(scene, camera);

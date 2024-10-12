@@ -44,6 +44,8 @@ export function setupScene() {
     });
     groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0); // Align it with the plane geometry
     world.addBody(groundBody);
+
+    
     
     return { scene, camera, renderer, world, cube, cubeBody};
 }

@@ -131,3 +131,33 @@ export function createBox(
 
     return { boxMesh, boxBody };
 }
+
+export function createWall(world, scene, position, dimensions, isVisible = true, color = 0xff0000) {
+    // Destructure dimensions for clarity
+    const { width, height, depth } = dimensions;
+
+    // Wall geometry and material
+    const wallGeometry = new THREE.BoxGeometry(width, height, depth);
+    const wallMaterial = new THREE.MeshPhongMaterial({ color }); // Use provided color
+
+    // Create wall mesh
+    const wall = new THREE.Mesh(wallGeometry, wallMaterial);
+    wall.position.set(position.x, position.y, position.z); // Set custom position
+    scene.add(wall);
+
+    // Create Cannon.js body for the wall
+    const wallBody = new CANNON.Body({
+        mass: 0, // Static body
+        position: new CANNON.Vec3(position.x, position.y, position.z) // Same position as the wall mesh
+    });
+
+    // Create a shape for the wall body
+    const shape = new CANNON.Box(new CANNON.Vec3(width / 2, height / 2, depth / 2)); // Half extents
+    wallBody.addShape(shape);
+    world.addBody(wallBody);
+
+    // Set wall visibility
+    wall.visible = isVisible; // Control visibility of the wall mesh
+
+    return { wall, wallBody }; // Return the created wall mesh and body for further use if needed
+}
