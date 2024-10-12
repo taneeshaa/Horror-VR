@@ -2,8 +2,8 @@ import { PointerLockControls } from 'three/addons/controls/PointerLockControls.j
 import * as THREE from 'three';
 
 export class PlayerControls {
-    constructor(camera, documentBody) {
-        this.camera = camera;
+    constructor(cubeBody, camera, documentBody) {
+        this.cubeBody = cubeBody;
         this.controls = new PointerLockControls(camera, documentBody);
         this.velocity = new THREE.Vector3();
         this.direction = new THREE.Vector3();
@@ -67,12 +67,12 @@ export class PlayerControls {
                 this.velocity.y -= this.gravity * deltaTime; // Simulate gravity
             }
 
-            this.camera.position.y += this.velocity.y * deltaTime; // Update player vertical position
+            this.cubeBody.position.y += this.velocity.y * deltaTime; // Update player vertical position
 
             // Check for ground collision
-            if (this.camera.position.y < this.playerHeight) {
+            if (this.cubeBody.position.y < this.playerHeight) {
                 this.velocity.y = 0; // Stop falling
-                this.camera.position.y = this.playerHeight; // Set position to ground level
+                this.cubeBody.position.y = this.playerHeight; // Set position to ground level
                 this.isOnGround = true; // Set the player as on the ground
             } else {
                 this.isOnGround = false; // Player is in the air

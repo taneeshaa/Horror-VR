@@ -13,7 +13,7 @@ AFRAME.registerComponent('ghost-chase', {
     this.isMoving = false;
     this.isInteractionDone = false;
 
-    // Create 3.js bounding boxes for the player and ghost
+    // Create 3.js bounding boxes for the pwlayer and ghost
     this.ghostBB = new THREE.Box3().setFromObject(this.ghost.object3D);
     this.playerBB = new THREE.Box3().setFromObject(this.player.object3D);
 

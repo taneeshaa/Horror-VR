@@ -3,9 +3,9 @@ import { PlayerControls } from './controls.js';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { AddObjects } from './starting-scene-objects.js';
-import { createBox } from './shapes.js'; // Import the createBox function
+import { createBox, createSphere } from './shapes.js'; // Import the createBox function
 
-const { scene, camera, renderer, world } = setupScene();
+const { scene, camera, renderer, world, cube, cubeBody } = setupScene();
 
 // Load GLB asset for the main scene
 const loader = new GLTFLoader();
@@ -61,7 +61,7 @@ function checkIntersections() {
         console.log('Hit:', firstIntersectedObject);
 
         // Change the script from starting-scene.js to circus-scene.js
-        switchSceneScript('scripts/circus-scene.js');
+        //switchSceneScript('scripts/circus-scene.js');
     }
 }
 
@@ -83,40 +83,32 @@ function removeAssets() {
 
 // Function to switch scene script
 function switchSceneScript(newScriptSrc) {
-    // Remove existing assets from the scene
-    removeAssets();
-
-    const oldScript = document.querySelector('script[src="scripts/starting-scene.js"]');
-    if (oldScript) {
-        oldScript.remove();  // Remove the current scene script
-    }
-
-    const newScript = document.createElement('script');
-    newScript.src = newScriptSrc;
-    newScript.type = "module";
-    
-    // Append the new scene script to the body
-    document.body.appendChild(newScript);
-
-    console.log(`Switched to scene script: ${newScriptSrc}`);
+    //switch scene
 }
 
 
 
-const controls = new PlayerControls(camera, document.body);
+const controls = new PlayerControls(cubeBody, camera, document.body);
 
 function animate() {
     requestAnimationFrame(animate);
     world.step(1 / 60);
 
-    console.log(camera.position.x, camera.position.y, camera.position.z);
+    console.log("Camera", camera.position.x, camera.position.y, camera.position.z);
 
     // Clamp camera position within the bounding box
-    camera.position.x = Math.max(box.min.x, Math.min(camera.position.x, box.max.x));
-    camera.position.z = Math.max(box.min.z, Math.min(camera.position.z, box.max.z));
+    // camera.position.x = Math.max(box.min.x, Math.min(camera.position.x, box.max.x));
+    // camera.position.z = Math.max(box.min.z, Math.min(camera.position.z, box.max.z));
 
     sphereMesh.position.copy(sphereBody.position);
     sphereMesh.quaternion.copy(sphereBody.quaternion);
+
+    // Update cube position and rotation
+    cube.position.copy(cubeBody.position);
+    cube.quaternion.copy(cubeBody.quaternion);
+
+    // Follow the cube with the camera
+    camera.position.set(cube.position.x, cube.position.y + 1.5, cube.position.z);
 
     controls.updateMovement(0.05);
     renderer.render(scene, camera);
