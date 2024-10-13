@@ -1,9 +1,9 @@
 import { setupScene } from './scene-setup.js'; 
-import { PlayerControls } from './controls.js'; 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { AddObjects } from './starting-scene-objects.js';
-import { createBox, createSphere } from './shapes.js'; // Import the createBox function
+import { playerMovement } from './playerMovement.js';
+import { PointerLockControls } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/examples/jsm/controls/PointerLockControls.js';
 
 const { scene, camera, renderer, world, cube, cubeBody } = setupScene();
 
@@ -87,8 +87,11 @@ function switchSceneScript(newScriptSrc) {
 }
 
 
-
-const controls = new PlayerControls(cubeBody, camera, document.body);
+const controls = new PointerLockControls(camera, document.body);
+document.body.addEventListener('click', () => {
+  controls.lock();
+});
+// const controls = new PlayerControls(cubeBody, camera, document.body);
 
 function animate() {
     requestAnimationFrame(animate);
@@ -99,7 +102,7 @@ function animate() {
     // Clamp camera position within the bounding box
     // camera.position.x = Math.max(box.min.x, Math.min(camera.position.x, box.max.x));
     // camera.position.z = Math.max(box.min.z, Math.min(camera.position.z, box.max.z));
-
+    playerMovement(camera, cube, cubeBody);
     sphereMesh.position.copy(sphereBody.position);
     sphereMesh.quaternion.copy(sphereBody.quaternion);
 
@@ -108,9 +111,9 @@ function animate() {
     cube.quaternion.copy(cubeBody.quaternion);
 
     // Follow the cube with the camera
-    camera.position.set(cube.position.x, cube.position.y + 1.5, cube.position.z);
+    // camera.position.set(cube.position.x, cube.position.y + 1.5, cube.position.z);
 
-    controls.updateMovement(0.05);
+    // controls.updateMovement(0.05);
     renderer.render(scene, camera);
 }
 

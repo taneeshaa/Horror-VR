@@ -1,4 +1,4 @@
-import { createPlane, createSphere, createBox } from './shapes.js'; 
+import { createPlane, createSphere, createBox } from './shape.js'; 
 import * as THREE from 'three';
 
 export function AddObjects(scene, world){

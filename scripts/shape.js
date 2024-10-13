@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 export function createPlane(
     position = new THREE.Vector3(0, 0, 0), 
@@ -108,7 +109,7 @@ export function createBox(
     // Create a transparent material
     const boxMaterial = new THREE.MeshStandardMaterial({
         color: 0xff0000, // Red color for the box
-        transparent: true, // Enable transparency
+        transparent: false, // Enable transparency
         opacity: 0, // Set transparency level (50% opacity)
         side: THREE.DoubleSide // Optional: render both sides
     });
@@ -119,6 +120,7 @@ export function createBox(
     // Set position and rotation
     boxMesh.position.copy(position);
     boxMesh.rotation.set(rotation.x, rotation.y, rotation.z);
+    boxMesh.name = "Spider Mesh"; 
 
     // Create a corresponding Cannon.js body
     const boxShape = new CANNON.Box(new CANNON.Vec3(width / 2, height / 2, depth / 2));
@@ -132,7 +134,7 @@ export function createBox(
     return { boxMesh, boxBody };
 }
 
-export function createWall(world, scene, position, dimensions, rotation, isVisible = true, color = 0xff0000) {
+export function createWall(world, scene, position, dimensions, rotation, isVisible = true, color = 0xff0000, name = "wall") {
     // Destructure dimensions for clarity
     const { width, height, depth } = dimensions;
 
@@ -142,6 +144,7 @@ export function createWall(world, scene, position, dimensions, rotation, isVisib
 
     // Create wall mesh
     const wall = new THREE.Mesh(wallGeometry, wallMaterial);
+    wall.name = name;
     wall.position.set(position.x, position.y, position.z); // Set custom position
     wall.rotation.set(rotation.x, rotation.y, rotation.z); // Set custom rotation
     scene.add(wall);
@@ -163,6 +166,40 @@ export function createWall(world, scene, position, dimensions, rotation, isVisib
     // Set wall visibility
     wall.visible = isVisible; // Control visibility of the wall mesh
 
-    return { wall, wallBody }; 
+    return { wall }; 
+}
+
+export function createSpider(
+    scene,
+    world,
+    position = new THREE.Vector3(-5, 0.5, 6),
+    scale = new THREE.Vector3(0.1, 0.1, 0.1)
+    
+) {
+    const loader = new GLTFLoader();
+
+    const spiderAssetUrl = 'https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/spider.glb?v=1728809954090';
+
+    // Load the spider model
+    loader.load(spiderAssetUrl, (gltf) => {
+        // Set the scale and position for the spider model
+        gltf.scene.scale.set(scale.x, scale.y, scale.z);
+        gltf.scene.position.set(position.x, position.y, position.z);
+        // scene.add(gltf.scene); // Add the model to the scene 
+        // Update the function to return both the glTF model and the physics body
+    });
+    const boxGeometry = new THREE.BoxGeometry(0.7, 0.7, 0.7);
+    const boxMaterial = new THREE.MeshPhongMaterial( 0xff0000 ); // Use provided color
+
+    // Create wall mesh
+    const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
+    boxMesh.name = "spider mesh";
+    boxMesh.position.set(position.x, position.y, position.z); // Set custom position
+
+    // Add the box to the scene and physics world
+    scene.add(boxMesh);
+    // world.addBody(boxBody);
+
+    return { boxMesh};
 }
 

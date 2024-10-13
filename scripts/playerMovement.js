@@ -55,7 +55,7 @@ export function playerMovement(camera, cube, cubeBody){
   const direction = new THREE.Vector3();
   camera.getWorldDirection(direction);
   direction.y = 0; 
-  console.log("Camera", cubeBody.position.x, cubeBody.position.y, cubeBody.position.z);
+  // console.log("Camera", cubeBody.position.x, cubeBody.position.y, cubeBody.position.z);
   const forwardVector = new THREE.Vector3(direction.x, 0, direction.z).normalize();
   const rightVector = new THREE.Vector3().crossVectors(camera.up, forwardVector).normalize();
 
