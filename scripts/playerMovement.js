@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 // WASD Movement
-const moveSpeed = 4;
+const moveSpeed = 1;
 const velocity = new THREE.Vector3();
 let canJump = false; // Jump flag to ensure the player is grounded before jumping
 

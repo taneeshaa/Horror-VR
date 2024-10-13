@@ -1,21 +1,21 @@
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as THREE from 'three';
-import { createPlane, createWall} from './shapes';
+import { createPlane, createWall} from './shape';
 
-export function createAllScenes(scene){
-  scene1 = createScene1(scene);
-  scene2 = createScene2(scene);
-  scene3 = createScene3(scene);
-  scene4 = createScene4(scene);
+export function createAllScenes(){
+  scene1 = createScene1();
+  scene2 = createScene2();
+  scene3 = createScene3();
+  scene4 = createScene4();
   return {scene1, scene2, scene3, scene4};
 }
-function createScene1(scene){
+function createScene1(){
   const scene = new THREE.Scene();
 
   return scene;
 }
 
-function createScene2(scene){
+function createScene2(){
   const scene = new THREE.Scene();
 
   // Load GLB asset for the main scene
@@ -31,13 +31,13 @@ function createScene2(scene){
   return scene;
 }
 
-function createScene3(scene){
+function createScene3(){
   const scene = new THREE.Scene();
 
   return scene;
 }
 
-function createScene4(scene){
+function createScene4(){
   const scene = new THREE.Scene();
 
   return scene;

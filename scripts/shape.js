@@ -132,7 +132,7 @@ export function createBox(
     return { boxMesh, boxBody };
 }
 
-export function createWall(world, scene, position, dimensions, isVisible = true, color = 0xff0000) {
+export function createWall(world, scene, position, dimensions, rotation, isVisible = true, color = 0xff0000) {
     // Destructure dimensions for clarity
     const { width, height, depth } = dimensions;
 
@@ -143,6 +143,7 @@ export function createWall(world, scene, position, dimensions, isVisible = true,
     // Create wall mesh
     const wall = new THREE.Mesh(wallGeometry, wallMaterial);
     wall.position.set(position.x, position.y, position.z); // Set custom position
+    wall.rotation.set(rotation.x, rotation.y, rotation.z); // Set custom rotation
     scene.add(wall);
 
     // Create Cannon.js body for the wall
@@ -154,10 +155,14 @@ export function createWall(world, scene, position, dimensions, isVisible = true,
     // Create a shape for the wall body
     const shape = new CANNON.Box(new CANNON.Vec3(width / 2, height / 2, depth / 2)); // Half extents
     wallBody.addShape(shape);
+
+    // Set rotation for the Cannon.js body
+    wallBody.quaternion.setFromEuler(rotation.x, rotation.y, rotation.z); // Use the same rotation for physics body
     world.addBody(wallBody);
 
     // Set wall visibility
     wall.visible = isVisible; // Control visibility of the wall mesh
 
-    return { wall, wallBody }; // Return the created wall mesh and body for further use if needed
+    return { wall, wallBody }; 
 }
+
