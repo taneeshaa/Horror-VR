@@ -18,7 +18,7 @@ export function AddObjects(scene, world){
   );
 
   // Add the box to the scene and physics world
-  scene.add(boxMesh);
+  // scene.add(boxMesh);
 
   const spiders = [];
   const spiderPositions = [
@@ -32,11 +32,11 @@ export function AddObjects(scene, world){
 
   // Create each spider and add them to the array
   spiderPositions.forEach(position => {
-    const { spider, spiderMesh } = createSpider(scene, world, position);
-    spiders.push({ spider, spiderMesh, position });
+    const { spider } = createSpider(scene, world, position);
+    spiders.push({ spider, position });
   });
 
-  return { boxMesh, boxBody, spiders};
+  return { spiders};
 }
 
 function createSpider(scene, world, position,  ){
@@ -49,7 +49,7 @@ function createSpider(scene, world, position,  ){
       gltf.scene.scale.set(0.1, 0.1, 0.1); 
       gltf.scene.position.set(position.x, 0.2, position.z);
       scene.add(gltf.scene);
-      spider2 = gltf.scene;
+      spider = gltf.scene;
   });
 
   //create box around button
@@ -62,7 +62,7 @@ function createSpider(scene, world, position,  ){
 );
 
 // Add the box to the scene and physics world
-scene.add(boxMesh);
+// scene.add(boxMesh);
 
-return {spider, boxMesh};
+return {spider};
 }

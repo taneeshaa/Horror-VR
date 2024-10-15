@@ -74,6 +74,12 @@ function createColliders(){
     createWall(world, scene, { x: -17, y: 1.5, z: 2 }, { width: 16, height: 6, depth: 2 }, { x: 0, y: Math.PI/2, z: 0 }, false);
   }
   createColliders();
+
+const controls = new PointerLockControls(camera, document.body);
+document.body.addEventListener('click', () => {
+  controls.lock();
+});
+
 // Load GLB asset for the main scene
 const loader = new GLTFLoader();
 const glbAssetUrl = 'https://cdn.glitch.me/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/the_mansion_interiors.glb?v=1728751045599';
@@ -94,7 +100,7 @@ loader.load(spiderAssetUrl, (gltf) => {
 });
 
 // Create other objects in the scene
-const { boxMesh, boxBody, spiders } = AddObjects(scene, world);
+const { spiders } = AddObjects(scene, world);
 
 document.body.appendChild(renderer.domElement);
 
@@ -102,6 +108,7 @@ document.body.appendChild(renderer.domElement);
 const overlay = document.getElementById('overlay');
 
 let playerHoldingDoll = false;
+let spiderCount = 6;
 
 function toggleSpider() {
     if (playerHoldingDoll) {
@@ -109,9 +116,10 @@ function toggleSpider() {
         const distance = cube.position.distanceTo(furnacePosition);
         if (distance < 3) {
             overlay.textContent = "Spider burned!";
-            scene.remove(spider0);
-            scene.remove(boxMesh);
+            scene.remove(spiderUpdateMesh);
+            // scene.remove(boxMesh);
             playerHoldingDoll = false;
+            spiderCount--;
 
             if (spiderCount > 0) {
                 setTimeout(function () {
@@ -124,28 +132,19 @@ function toggleSpider() {
             //reset position back to original
         }
     } else {
-        const distance = cube.position.distanceTo(spider0.position);
-        if (distance < 2) {
-            overlay.textContent = "Go to the furnace and burn the spider!";
-
-            // Set spider as inactive
-            for (let i = 0; i < spiderData.length; i++) {
-                const spider = spiderData[i];
-                // Check if the spider position matches the one being picked up
-                if (spider.active && spider0.position.equals(spider.position)) {
-                    spiderData[i].active = false; // Set the active flag to false
-                    console.log(`Spider at position ${spider.position} picked up. Set to inactive.`);
-                    break; // Exit the loop once the matching spider is found
-                }
-            }
-            playerHoldingDoll = true;
-
-        } else {
-            // text remains the same
+        for(let i = 0; i < spiders.length; i++){
+            const distance = cube.position.distanceTo(spiders[i].position);
+            console.log(distance);
+            if (distance < 2) {
+                overlay.textContent = "Go to the furnace and burn the spider!";
+                playerHoldingDoll = true;
+                spiderUpdateMesh = spiders[i].spider;
+                break;
+            } 
         }
     }
 }
-
+let spiderUpdateMesh = spider0;
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2(0, 0);
 document.addEventListener('click', () => {
@@ -154,7 +153,7 @@ document.addEventListener('click', () => {
 
 function checkIntersections() {
     raycaster.setFromCamera(mouse, camera);
-
+    
     const objectsToTest = [spider0]; // Add the button box to objects to test
     const intersects = raycaster.intersectObjects(objectsToTest, true);
 
@@ -165,20 +164,6 @@ function checkIntersections() {
     }
 }
 
-const spiderData = [
-    { position: new THREE.Vector3(20, 0.2, -1.6), active: true },
-    { position: new THREE.Vector3(23, 0.2, 19.2), active: true },
-    { position: new THREE.Vector3(-4, 0.2, 4.6), active: true },
-    { position: new THREE.Vector3(-26, 0.2, 17.9), active: true },
-    { position: new THREE.Vector3(-8, 0.2, 0.7), active: true },
-    { position: new THREE.Vector3(-8, 0.2, -6.9), active: true }
-];
-
-
-const controls = new PointerLockControls(camera, document.body);
-document.body.addEventListener('click', () => {
-  controls.lock();
-});
 
 function animate() {
     requestAnimationFrame(animate);
@@ -191,12 +176,9 @@ function animate() {
     cube.position.copy(cubeBody.position);
     cube.quaternion.copy(cubeBody.quaternion);
 
-    spider0.position.copy(boxMesh.position);
-    spider0.quaternion.copy(boxMesh.quaternion);
-
     if (playerHoldingDoll) {
-        // Update the doll's position to follow the player (cubebody)
-        boxMesh.position.set(
+        // Update the spider's position to follow the player (cubebody)
+        spider0.position.set(
             cubeBody.position.x + 0.9,
             cubeBody.position.y + 0.8,
             cubeBody.position.z + 0.5
