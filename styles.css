@@ -79,6 +79,9 @@ body {
   text-shadow: 2px 2px 0 #000, 4px 4px 10px #000;
   animation: fadeIn 2s ease-in-out;
 }
+.hidden {
+  display: none;
+}
 
 @keyframes fadeIn {
   0% { opacity: 0; }

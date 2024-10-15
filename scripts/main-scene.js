@@ -111,8 +111,6 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-animate();
-
 //#endregion
 
 //#region assets
@@ -229,18 +227,164 @@ function checkIntersections() {
         console.log('Hit:', firstIntersectedObject);
     }
 }
+// Load sounds
+const crawlSound = new Audio('https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/SpiderCrawling.m4a?v=1726989205904'); 
+const attackSound = new Audio('https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/SpiderAttack_.m4a?v=1726988605221'); 
+
+const deathMessage = document.querySelector('#death-message');
+
+//#region Ghost Bodies
+//Create a cannon body for the ghost
+let ghost1Body = new CANNON.Body({
+    mass: 1, // Mass of the ghost
+    position: new CANNON.Vec3(-25, 3, -10),
+    angularFactor: new CANNON.Vec3(0, 1, 0) // Use the custom initial position
+});
+
+// Define a box shape around the ghost
+let ghost1Shape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5)); // Adjust size as needed
+ghost1Body.addShape(ghost1Shape);
+world.addBody(ghost1Body);
+
+//Create a cannon body for the ghost
+let ghost2Body = new CANNON.Body({
+    mass: 1, // Mass of the ghost
+    position: new CANNON.Vec3(16, 3, 10),
+    angularFactor: new CANNON.Vec3(0, 1, 0) // Use the custom initial position
+});
+
+// Define a box shape around the ghost
+let ghost2Shape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5)); // Adjust size as needed
+ghost2Body.addShape(ghost2Shape);
+world.addBody(ghost2Body);
+
+//Create a cannon body for the ghost
+let ghost3Body = new CANNON.Body({
+    mass: 1, // Mass of the ghost
+    position: new CANNON.Vec3(7.25, 3, -124),
+    angularFactor: new CANNON.Vec3(0, 1, 0) // Use the custom initial position
+});
+console.log(ghost1Body);
+
+// Define a box shape around the ghost
+let ghost3Shape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5)); // Adjust size as needed
+ghost3Body.addShape(ghost3Shape);
+world.addBody(ghost3Body);
+
+// Load the GLTF model
+
+let ghost1Model, ghost2Model, ghost3Model;
+loader.load('https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/spider_doll.glb?v=1726948097905', (gltf) => {
+    ghost1Model = gltf.scene;
+    ghost1Model.position.copy(ghost1Body.position);
+    ghost1Model.rotation.copy(ghost1Body.quaternion);
+    scene.add(ghost1Model);
+});
+
+loader.load('https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/spider_doll.glb?v=1726948097905', (gltf) => {
+    ghost2Model = gltf.scene;
+    ghost2Model.position.copy(ghost2Body.position);
+    ghost2Model.rotation.copy(ghost2Body.quaternion);
+    scene.add(ghost2Model);
+});
+
+loader.load('https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/spider_doll.glb?v=1726948097905', (gltf) => {
+    ghost3Model = gltf.scene;
+    ghost3Model.position.copy(ghost3Body.position);
+    ghost3Model.rotation.copy(ghost3Body.quaternion);
+    scene.add(ghost3Model);
+});
+//#endregion
+
+// Set the desired speed for the ghost
+
+// Function to update the ghost's movement towards the player
+function moveGhostTowardsPlayer(playerbody, ghostbody, speed) {
+    // Get the player's and ghost's current positions
+    const playerPos = playerbody.position;
+    const ghostPos = ghostbody.position;
+
+    // Calculate the direction vector from ghost to player
+    const direction = new CANNON.Vec3(
+        playerPos.x - ghostPos.x,
+        playerPos.y - ghostPos.y,
+        playerPos.z - ghostPos.z
+    );
+
+    // Normalize the direction vector (get the unit vector)
+    const distance = direction.length();
+    if (distance > 0) {
+        direction.x /= distance;
+        direction.y /= distance;
+        direction.z /= distance;
+    }
+
+    // Scale the direction by the desired speed
+    const velocity = new CANNON.Vec3(
+        direction.x * speed,
+        direction.y * speed,
+        direction.z * speed
+    );
+
+    // Set the ghost's velocity to move towards the player
+    ghostbody.velocity.set(velocity.x, velocity.y, velocity.z);
+
+    // Update ghost model's rotation to face the player
+    const angle = Math.atan2(direction.z, direction.x); // Calculate the angle in radians
+    ghostbody.quaternion.setFromEuler(0, angle, 0); // Set the quaternion to face the player
+}
+
+function ghostAI(playerbody, ghostbody){
+    const playerPos = playerbody.position;
+    const ghostPos = ghostbody.position;
+
+    const distance = playerPos.position.distanceTo(ghostPos);
+    if(distance > 12){
+        return;
+    }
+    if(distance < 12 && distance > 6){
+        moveGhostTowardsPlayer(playerbody, ghostbody, 0.7);
+        crawlSound.loop = true;
+        crawlSound.play();
+    }
+    else if(distance < 6 && distance > 2){
+        moveGhostTowardsPlayer(playerbody, ghostbody, 1.4);
+        crawlSound.play();
+        
+    }
+    else{
+        crawlSound.pause();
+        attackSound.play();
+        gameOverMessage.classList.remove('hidden');
+        setTimeout(() => {
+            location.reload();
+        }, 3000);
+        //attack music
+        //restart level
+    }
+}
+
+let cannonSpeed = 0.05;  // Speed when chasing
+let fastSpeed = 0.1;     // Speed when close to player
+
 
 
 function animate() {
     requestAnimationFrame(animate);
     world.step(1 / 60);
+    
+    moveGhostTowardsPlayer(cubeBody, ghost1Body, 0.7);
 
-    // console.log("Camera", camera.position.x, camera.position.y, camera.position.z);
+    console.log("Camera", camera.position.x, camera.position.y, camera.position.z);
 
     playerMovement(camera, cube, cubeBody);
 
     cube.position.copy(cubeBody.position);
     cube.quaternion.copy(cubeBody.quaternion);
+
+    // Update ghost model position and rotation
+    ghost1Model.position.copy(ghost1Body.position);
+    ghost1Model.quaternion.copy(ghost1Body.quaternion);
 
     if (playerHoldingDoll) {
         // Update the spider's position to follow the player (cubebody)
@@ -254,3 +398,4 @@ function animate() {
     renderer.render(scene, camera);
 }
 
+animate();
