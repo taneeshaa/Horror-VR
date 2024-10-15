@@ -5,7 +5,7 @@ import { AddObjects } from './starting-scene-objects.js';
 import { playerMovement } from './playerMovement.js';
 import { PointerLockControls } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/examples/jsm/controls/PointerLockControls.js';
 import {createWall} from './shape.js';
-
+//#region scene-setup
 const { scene, camera, renderer, world, cube, cubeBody } = setupScene();
 function createColliders(){
     createWall(world, scene, { x: 1, y: 1.5, z: -50 }, { width: 115, height: 5, depth: 0.5 }, { x: 0, y: Math.PI / 2, z: 0 }, false);
@@ -80,6 +80,42 @@ document.body.addEventListener('click', () => {
   controls.lock();
 });
 
+document.body.appendChild(renderer.domElement);
+
+// Function to toggle text visibility
+const overlay = document.getElementById('overlay');
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2(0, 0);
+document.addEventListener('click', () => {
+    checkIntersections();
+});
+
+let playerHoldingDoll = false;
+let spiderCount = 6;
+const spiders = [];
+  const spiderPositions = [
+    new THREE.Vector3(0, 0.2, 15),
+    new THREE.Vector3(20, 0.2, -1.6),
+    new THREE.Vector3(23, 0.2, 19.2),
+    new THREE.Vector3(-4, 0.2, 4.6),
+    new THREE.Vector3(-26, 0.2, 17.9),
+    new THREE.Vector3(-8, 0.2, 0.7),
+    new THREE.Vector3(-8, 0.2, -6.9)
+  ];
+
+// Handle window resizing
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+animate();
+
+//#endregion
+
+//#region assets
 // Load GLB asset for the main scene
 const loader = new GLTFLoader();
 const glbAssetUrl = 'https://cdn.glitch.me/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/the_mansion_interiors.glb?v=1728751045599';
@@ -89,7 +125,7 @@ loader.load(glbAssetUrl, (gltf) => {
     scene.add(gltf.scene);
 });
 
-let spider0;
+let spider0, spider1, spider2, spider3, spider4, spider5, spider6, spider7;
 // Load GLB asset for the button
 const spiderAssetUrl = 'https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/spider.glb?v=1728809954090';
 loader.load(spiderAssetUrl, (gltf) => {
@@ -98,17 +134,51 @@ loader.load(spiderAssetUrl, (gltf) => {
     scene.add(gltf.scene);
     spider0 = gltf.scene;
 });
+let spiderUpdateMesh = spider0;
 
-// Create other objects in the scene
-const { spiders } = AddObjects(scene, world);
 
-document.body.appendChild(renderer.domElement);
+loader.load(spiderAssetUrl, (gltf) => {
+    gltf.scene.scale.set(0.1, 0.1, 0.1); 
+    gltf.scene.position.set(20, 0.2, -1.6);
+    scene.add(gltf.scene);
+    spider1 = gltf.scene;
+});
 
-// Function to toggle text visibility
-const overlay = document.getElementById('overlay');
+loader.load(spiderAssetUrl, (gltf) => {
+    gltf.scene.scale.set(0.1, 0.1, 0.1); 
+    gltf.scene.position.set(23, 0.2, 19.2);
+    scene.add(gltf.scene);
+    spider2 = gltf.scene;
+});
+loader.load(spiderAssetUrl, (gltf) => {
+    gltf.scene.scale.set(0.1, 0.1, 0.1); 
+    gltf.scene.position.set(-4, 0.2, 4.6);
+    scene.add(gltf.scene);
+    spider3 = gltf.scene;
+});
+loader.load(spiderAssetUrl, (gltf) => {
+    gltf.scene.scale.set(0.1, 0.1, 0.1); 
+    gltf.scene.position.set(-26, 0.2, 17.9);
+    scene.add(gltf.scene);
+    spider4 = gltf.scene;
+});
 
-let playerHoldingDoll = false;
-let spiderCount = 6;
+loader.load(spiderAssetUrl, (gltf) => {
+    gltf.scene.scale.set(0.1, 0.1, 0.1); 
+    gltf.scene.position.set(-8, 0.2, 0.7);
+    scene.add(gltf.scene);
+    spider5 = gltf.scene;
+});
+
+loader.load(spiderAssetUrl, (gltf) => {
+    gltf.scene.scale.set(0.1, 0.1, 0.1); 
+    gltf.scene.position.set(-8, 0.2, -6.9);
+    scene.add(gltf.scene);
+    spider6 = gltf.scene;
+});
+
+//#endregion
+
 
 function toggleSpider() {
     if (playerHoldingDoll) {
@@ -128,33 +198,29 @@ function toggleSpider() {
             } else {
                 //game over logic
             }
-        } else {
-            //reset position back to original
         }
     } else {
-        for(let i = 0; i < spiders.length; i++){
-            const distance = cube.position.distanceTo(spiders[i].position);
-            console.log(distance);
-            if (distance < 2) {
-                overlay.textContent = "Go to the furnace and burn the spider!";
-                playerHoldingDoll = true;
-                spiderUpdateMesh = spiders[i].spider;
-                break;
-            } 
+            for(let i = 0; i < spiderPositions.length; i++){
+                const distance = cube.position.distanceTo(spiderPositions[i]);
+                if (distance < 2) {
+                    overlay.textContent = "Go to the furnace and burn the spider!";
+                    playerHoldingDoll = true;
+                    if(i == 0) spiderUpdateMesh = spider0;
+                    else if(i == 1) spiderUpdateMesh = spider1;
+                    else if(i == 2) spiderUpdateMesh = spider2;
+                    else if(i == 3) spiderUpdateMesh = spider3;
+                    else if(i == 4) spiderUpdateMesh = spider4;
+                    else if(i == 5) spiderUpdateMesh = spider5;
+                    else if(i == 6) spiderUpdateMesh = spider6;
+                } 
+            }
         }
     }
-}
-let spiderUpdateMesh = spider0;
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2(0, 0);
-document.addEventListener('click', () => {
-    checkIntersections();
-});
 
 function checkIntersections() {
     raycaster.setFromCamera(mouse, camera);
     
-    const objectsToTest = [spider0]; // Add the button box to objects to test
+    const objectsToTest = [spider0, spider1, spider2, spider3, spider4, spider5, spider6]; // Add the button box to objects to test
     const intersects = raycaster.intersectObjects(objectsToTest, true);
 
     if (intersects.length > 0) {
@@ -169,7 +235,7 @@ function animate() {
     requestAnimationFrame(animate);
     world.step(1 / 60);
 
-    console.log("Camera", camera.position.x, camera.position.y, camera.position.z);
+    // console.log("Camera", camera.position.x, camera.position.y, camera.position.z);
 
     playerMovement(camera, cube, cubeBody);
 
@@ -178,7 +244,7 @@ function animate() {
 
     if (playerHoldingDoll) {
         // Update the spider's position to follow the player (cubebody)
-        spider0.position.set(
+        spiderUpdateMesh.position.set(
             cubeBody.position.x + 0.9,
             cubeBody.position.y + 0.8,
             cubeBody.position.z + 0.5
@@ -188,11 +254,3 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-// Handle window resizing
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-animate();
