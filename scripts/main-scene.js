@@ -6,6 +6,18 @@ import { playerMovement } from './playerMovement.js';
 import { PointerLockControls } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/examples/jsm/controls/PointerLockControls.js';
 import {createWall} from './shape.js';
 //#region scene-setup
+const homepage = document.getElementById('homepage');
+const gameContainer = document.getElementById('game-container');
+const startButton = document.getElementById('start-button');
+
+// Function to start the game
+startButton.addEventListener('click', () => {
+    // Hide the homepage
+    homepage.style.display = 'none';
+    // Show the game container
+    gameContainer.style.display = 'block';
+});
+
 const { scene, camera, renderer, world, cube, cubeBody } = setupScene();
 function createColliders(){
     createWall(world, scene, { x: 1, y: 1.5, z: -50 }, { width: 115, height: 5, depth: 0.5 }, { x: 0, y: Math.PI / 2, z: 0 }, false);
@@ -123,6 +135,26 @@ loader.load(glbAssetUrl, (gltf) => {
     scene.add(gltf.scene);
 });
 
+const floorAssetUrl = 'https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/wood_floor.glb?v=1729028560238';
+loader.load(floorAssetUrl, (gltf) => {
+    gltf.scene.scale.set(0.6, 0.6, 0.6); 
+    gltf.scene.position.set(0, -0.1, 0);
+    scene.add(gltf.scene);
+});
+
+loader.load(floorAssetUrl, (gltf) => {
+    gltf.scene.scale.set(0.6, 0.6, 0.6); 
+    gltf.scene.position.set(0, -0.1, -116);
+    scene.add(gltf.scene);
+});
+
+const fireAssetUrl = 'https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/animated_fire.glb?v=1729028565399';
+loader.load(fireAssetUrl, (gltf) => {
+    gltf.scene.scale.set(3, 3, 3); 
+    gltf.scene.position.set(1.63, 0.2, -162);
+    scene.add(gltf.scene);
+});
+
 let spider0, spider1, spider2, spider3, spider4, spider5, spider6, spider7;
 // Load GLB asset for the button
 const spiderAssetUrl = 'https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/spider.glb?v=1728809954090';
@@ -182,7 +214,7 @@ function toggleSpider() {
     if (playerHoldingDoll) {
         const furnacePosition = new THREE.Vector3(1.4, 1.5, -162); // Position of the furnace wall
         const distance = cube.position.distanceTo(furnacePosition);
-        if (distance < 3) {
+        if (distance < 5) {
             overlay.textContent = "Spider burned!";
             scene.remove(spiderUpdateMesh);
             // scene.remove(boxMesh);
@@ -230,8 +262,12 @@ function checkIntersections() {
 // Load sounds
 const crawlSound = new Audio('https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/SpiderCrawling.m4a?v=1726989205904'); 
 const attackSound = new Audio('https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/SpiderAttack_.m4a?v=1726988605221'); 
+const titleTrack = new Audio('https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/Main%20Title%20Track.m4a?v=1729031974777');
+titleTrack.loop = true;
+titleTrack.play();
 
 const deathMessage = document.getElementById('death-message');
+const numberDisplay = document.getElementById('number-display');
 
 //#region Ghost Bodies
 //Create a cannon body for the ghost
@@ -386,7 +422,7 @@ let fastSpeed = 0.1;     // Speed when close to player
 function animate() {
     requestAnimationFrame(animate);
     world.step(1 / 60);
-    
+    numberDisplay.textContent = spiderCount;
     // moveGhostTowardsPlayer(cubeBody, ghost1Body, 0.7);
     ghostAI(cubeBody, ghost1Body);
     ghostAI(cubeBody, ghost2Body);
