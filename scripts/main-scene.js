@@ -96,10 +96,10 @@ let spiderCount = 6;
 const spiders = [];
   const spiderPositions = [
     new THREE.Vector3(0, 0.2, 15),
-    new THREE.Vector3(20, 0.2, -1.6),
+    new THREE.Vector3(7, 0.2, -125),
     new THREE.Vector3(23, 0.2, 19.2),
     new THREE.Vector3(-4, 0.2, 4.6),
-    new THREE.Vector3(-26, 0.2, 17.9),
+    new THREE.Vector3(-3, 0.2, -111),
     new THREE.Vector3(-8, 0.2, 0.7),
     new THREE.Vector3(-8, 0.2, -6.9)
   ];
@@ -137,7 +137,7 @@ let spiderUpdateMesh = spider0;
 
 loader.load(spiderAssetUrl, (gltf) => {
     gltf.scene.scale.set(0.1, 0.1, 0.1); 
-    gltf.scene.position.set(20, 0.2, -1.6);
+    gltf.scene.position.set(7, 0.2, -125);
     scene.add(gltf.scene);
     spider1 = gltf.scene;
 });
@@ -156,7 +156,7 @@ loader.load(spiderAssetUrl, (gltf) => {
 });
 loader.load(spiderAssetUrl, (gltf) => {
     gltf.scene.scale.set(0.1, 0.1, 0.1); 
-    gltf.scene.position.set(-26, 0.2, 17.9);
+    gltf.scene.position.set(-3, 0.2, -111);
     scene.add(gltf.scene);
     spider4 = gltf.scene;
 });
@@ -231,7 +231,7 @@ function checkIntersections() {
 const crawlSound = new Audio('https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/SpiderCrawling.m4a?v=1726989205904'); 
 const attackSound = new Audio('https://cdn.glitch.global/eb03fb9f-99e3-4e02-8dbe-548da61ab77c/SpiderAttack_.m4a?v=1726988605221'); 
 
-const deathMessage = document.querySelector('#death-message');
+const deathMessage = document.getElementById('death-message');
 
 //#region Ghost Bodies
 //Create a cannon body for the ghost
@@ -261,7 +261,7 @@ world.addBody(ghost2Body);
 //Create a cannon body for the ghost
 let ghost3Body = new CANNON.Body({
     mass: 1, // Mass of the ghost
-    position: new CANNON.Vec3(7.25, 3, -124),
+    position: new CANNON.Vec3(4.3, 3, 25),
     angularFactor: new CANNON.Vec3(0, 1, 0) // Use the custom initial position
 });
 console.log(ghost1Body);
@@ -333,29 +333,43 @@ function moveGhostTowardsPlayer(playerbody, ghostbody, speed) {
     const angle = Math.atan2(direction.z, direction.x); // Calculate the angle in radians
     ghostbody.quaternion.setFromEuler(0, angle, 0); // Set the quaternion to face the player
 }
+function calculateDistance(body1, body2) {
+    // Get positions of both bodies
+    const pos1 = body1.position;
+    const pos2 = body2.position;
+
+    // Calculate the differences in each dimension
+    const dx = pos2.x - pos1.x;
+    const dy = pos2.y - pos1.y;
+    const dz = pos2.z - pos1.z;
+
+    // Calculate and return the distance
+    return Math.sqrt(dx * dx + dy * dy + dz * dz);
+}
 
 function ghostAI(playerbody, ghostbody){
     const playerPos = playerbody.position;
     const ghostPos = ghostbody.position;
 
-    const distance = playerPos.position.distanceTo(ghostPos);
+    const distance = calculateDistance(playerbody, ghostbody);
     if(distance > 12){
+        crawlSound.pause();
         return;
     }
     if(distance < 12 && distance > 6){
-        moveGhostTowardsPlayer(playerbody, ghostbody, 0.7);
+        moveGhostTowardsPlayer(playerbody, ghostbody, 0.2);
         crawlSound.loop = true;
         crawlSound.play();
     }
     else if(distance < 6 && distance > 2){
-        moveGhostTowardsPlayer(playerbody, ghostbody, 1.4);
+        moveGhostTowardsPlayer(playerbody, ghostbody, 1);
         crawlSound.play();
         
     }
     else{
         crawlSound.pause();
         attackSound.play();
-        gameOverMessage.classList.remove('hidden');
+        deathMessage.style.display = 'block'
         setTimeout(() => {
             location.reload();
         }, 3000);
@@ -373,8 +387,10 @@ function animate() {
     requestAnimationFrame(animate);
     world.step(1 / 60);
     
-    moveGhostTowardsPlayer(cubeBody, ghost1Body, 0.7);
-
+    // moveGhostTowardsPlayer(cubeBody, ghost1Body, 0.7);
+    ghostAI(cubeBody, ghost1Body);
+    ghostAI(cubeBody, ghost2Body);
+    ghostAI(cubeBody, ghost3Body);
     console.log("Camera", camera.position.x, camera.position.y, camera.position.z);
 
     playerMovement(camera, cube, cubeBody);
@@ -385,6 +401,12 @@ function animate() {
     // Update ghost model position and rotation
     ghost1Model.position.copy(ghost1Body.position);
     ghost1Model.quaternion.copy(ghost1Body.quaternion);
+
+    ghost2Model.position.copy(ghost2Body.position);
+    ghost2Model.quaternion.copy(ghost2Body.quaternion);
+
+    ghost3Model.position.copy(ghost3Body.position);
+    ghost3Model.quaternion.copy(ghost3Body.quaternion);
 
     if (playerHoldingDoll) {
         // Update the spider's position to follow the player (cubebody)
